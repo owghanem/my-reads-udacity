@@ -7,6 +7,8 @@ const Book = props => {
         handleChange(book, e.target.value)
     }
 
+    const imageThumb = book.imageLinks ? book.imageLinks.smallThumbnail : null;
+
     return (
         <li>
             <div className="book">
@@ -14,7 +16,7 @@ const Book = props => {
                     <div className="book-cover" style={{
                         width: 128,
                         height: 193,
-                        backgroundImage: `url(${book.imageLinks.thumbnail})`
+                        backgroundImage: `url(${imageThumb})`
                     }}></div>
                     <div className="book-shelf-changer">
                         <select onChange={changeShelf} value={book.shelf}>

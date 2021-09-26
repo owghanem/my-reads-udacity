@@ -7,18 +7,36 @@ import { search } from '../BooksAPI';
 class Search extends React.Component {
     state = {
         query: '',
-        books: [],
+        result: [],
+        intersect: []
     }
 
     updateBooks = (input) => {
         const rawInput = input.trim()
         if (rawInput) {
-            search(rawInput).then(books => books && this.setState({ books }))
+            search(rawInput).then(result => result && this.setState({ result }))
         }
         else {
-            this.setState({ books: [] })
+            this.setState({ result: [] })
         }
-        this.setState({ query: input })
+        this.setState({ query: rawInput })
+        this.handleShelves()
+    }
+
+    handleShelves = () => {
+        const { result } = this.state
+        result.map(book => {
+            const { allBooks } = this.props
+            const intersect = allBooks.find(b => b.id === book.id)
+
+            if (intersect) {
+                book.shelf = intersect.shelf
+            } else {
+                book.shelf = "none"
+            }
+            return null
+        })
+        this.setState({ result })
     }
 
     render() {
@@ -36,7 +54,7 @@ class Search extends React.Component {
                 </div>
                 <div className="search-books-results">
                     <ol className="books-grid">
-                        {this.state.books.map((book) => <Book key={book.id} book={book} handleChange={this.props.handleChange} />)}
+                        {this.state.result.map((book) => <Book key={book.id} book={book} handleChange={this.props.addBook} />)}
                     </ol>
                 </div>
             </div>

@@ -1,7 +1,7 @@
 import React from 'react'
 import Home from './Pages/Home';
 import { Switch, Route } from 'react-router-dom';
-import { getAll, update as updateBooks } from './BooksAPI';
+import { getAll, update as updateBooksAPI } from './BooksAPI';
 import Search from './Pages/Search';
 import './App.css'
 
@@ -21,39 +21,29 @@ class BooksApp extends React.Component {
   }
 
   filterBooks = () => {
-    const books = this.state.books
+    const books = this.state.books.filter(b => (b.shelf !== "none"))
     const currentlyReading = books.filter(book => book.shelf === "currentlyReading")
     const wantToRead = books.filter(book => book.shelf === "wantToRead")
     const read = books.filter(book => book.shelf === "read")
-    this.setState({ currentlyReading, wantToRead, read })
+    this.setState({ books, currentlyReading, wantToRead, read })
   }
 
-  updateBookState = (book, newBookShelf) => {
-    this.setState(prevState => {
-      prevState.books.map((b) => {
-        if (b.id === book.id) {
-          b.shelf = newBookShelf
-        }
-        return book
-      })
-    })
+  updateBookShelf = (book, newBookShelf) => {
+    updateBooksAPI(book, newBookShelf).then(() => {
+      book.shelf = newBookShelf
+      this.setState(prevState => ({ books: prevState.books.filter(b => b.id !== book.id).concat(book) }))
 
-    this.filterBooks()
-  }
-
-  handleChange = (book, newBookShelf) => {
-    updateBooks(book, newBookShelf).then(() => {
-      this.updateBookState(book, newBookShelf)
+      this.filterBooks()
     })
   }
 
   render() {
     return (
-      <div className="app">
+      <div className="app" >
         <Switch>
           <Route exact path="/" render={() => (
             <Home
-              handleChange={this.handleChange}
+              handleChange={this.updateBookShelf}
               currentlyReading={this.state.currentlyReading}
               wantToRead={this.state.wantToRead}
               read={this.state.read}
@@ -61,10 +51,8 @@ class BooksApp extends React.Component {
           )} />
           <Route exact path="/search" render={() => (
             <Search
-              handleChange={this.handleChange}
-              currentlyReading={this.state.currentlyReading}
-              wantToRead={this.state.wantToRead}
-              read={this.state.read}
+              addBook={this.updateBookShelf}
+              allBooks={this.state.books}
             />
           )} />
         </Switch>

@@ -8,19 +8,17 @@ class Search extends React.Component {
     state = {
         query: '',
         result: [],
-        intersect: []
     }
 
-    updateBooks = (input) => {
-        const rawInput = input.trim()
-        if (rawInput) {
-            search(rawInput).then(result => result && this.setState({ result }))
+    updateBooks = (event) => {
+        const input = event.target.value
+        this.setState({ query: input })
+        if (input) {
+            search(input.trim()).then(result => { result.length > 0 ? this.setState({ result }, this.handleShelves()) : this.setState({ result: [] }, this.handleShelves()) })
         }
         else {
-            this.setState({ result: [] })
+            this.setState({ result: [] }, this.handleShelves())
         }
-        this.setState({ query: rawInput })
-        this.handleShelves()
     }
 
     handleShelves = () => {
@@ -48,7 +46,7 @@ class Search extends React.Component {
                         <input
                             type="text"
                             placeholder="Search by title or author"
-                            onChange={(e) => this.updateBooks(e.target.value)}
+                            onChange={this.updateBooks}
                             value={this.state.query} />
                     </div>
                 </div>
